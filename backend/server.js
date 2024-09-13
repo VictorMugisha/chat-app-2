@@ -16,35 +16,22 @@ const io = new Server(httpServer, {
 let users = {};
 
 // Handle Socket connections
-io.on('connection', (socket) => {
-  console.log("A new Client is connected: ", socket.id);
+io.on("connection", (socket) => {
+  console.log("A new client is connected: ", socket.id);
 
-  socket.on("chatMessage", (message) => {
-    console.log(`Received message: ${message} from client ${socket.id}`);
-
-    // When a user joins a chat (we'll send room and username from the client)
-    socket.on("joinRoom", ({ username, room }) => {
-      // Save the user in the room
-      users[socket.id] = { username, room };
-
-      // Join the user to the specific room
-      socket.join(room);
-
-      console.log(`${username} has joined room ${room}`);
-
-      // Send a welcome message to the user
-      socket.emit("message", `Welcome to room ${room}, ${username}`);
-
-      // Notify others in the room
-      socket.to(room).emit("message", `${username} has joined the room`);
-    });
-
-    // Broadcast the message to all connected clients (optional)
-    io.emit("chatMessage", message);
+  // When a user joins a room
+  socket.on("joinRoom", ({ username, room }) => {
+    users[socket.id] = { username, room };
+    socket.join(room);
+    console.log(`${username} has joined room ${room}`);
+    socket.emit("message", `Welcome to room ${room}, ${username}`);
+    socket.to(room).emit("message", `${username} has joined the room`);
   });
 
   // Handle message sending in a room
   socket.on("chatMessage", (message) => {
+    console.log(`Received message: ${message} from client ${socket.id}`);
+
     const user = users[socket.id];
     if (user && user.room) {
       // Broadcast the message to the specific room
@@ -65,9 +52,9 @@ io.on('connection', (socket) => {
     }
     delete users[socket.id]; // Clean up user
   });
-})
+});
 
-const PORT = 5000
+const PORT = 5000;
 httpServer.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
 });
