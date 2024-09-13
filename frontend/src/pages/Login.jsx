@@ -35,13 +35,13 @@ export default function Login() {
           <div className="mb-6">
             <label
               className="block text-gray-700 text-sm font-medium mb-2"
-              htmlFor="email"
+              htmlFor="text"
             >
-              Email
+              Username
             </label>
             <input
-              type="email"
-              id="email"
+              type="text"
+              id="text"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
