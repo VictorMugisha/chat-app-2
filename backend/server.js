@@ -14,7 +14,19 @@ const io = new Server(httpServer, {
 
 // Handle Socket connections
 io.on('connection', (socket) => {
-    console.log("A new Client is connected: ", socket.id)
+  console.log("A new Client is connected: ", socket.id);
+
+  socket.on("chatMessage", (message) => {
+    console.log(`Received message: ${message}`);
+
+    // Broadcast the message to all connected clients (optional)
+    io.emit("chatMessage", message);
+  });
+
+  // When a client disconnects
+  socket.on("disconnect", () => {
+    console.log("Client disconnected");
+  });
 })
 
 const PORT = 5000
