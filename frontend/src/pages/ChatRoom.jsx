@@ -1,55 +1,76 @@
-import { useState, useEffect } from "react";
+/* eslint-disable no-unused-vars */
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import io from "socket.io-client";
-import { useSelector } from "react-redux"; // Assuming you're using Redux for state management
+import { getChatMessages, sendMessage } from "../services/api";
+import ChatMessage from "../components/ChatMessage";
 
-const socket = io.connect("http://localhost:5000"); // Update with your server URL
+const socket = io("http://localhost:5000"); // Replace with your backend URL
 
-export default function ChatRoom () {
-  const [message, setMessage] = useState("");
+export default function ChatRoom() {
   const [messages, setMessages] = useState([]);
-  const user = useSelector((state) => state.user); // Update according to your state management
+  const [message, setMessage] = useState("");
+  const [user, setUser] = useState(null);
+  const [error, setError] = useState("");
+  const navigate = useNavigate();
 
   useEffect(() => {
-    socket.on("chatMessage", (msg) => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      navigate("/login");
+    } else {
+      getChatMessages(token).then((data) => {
+        if (data.success) {
+          setMessages(data.messages);
+        } else {
+          setError(data.message);
+        }
+      });
+    }
+
+    socket.on("message", (msg) => {
       setMessages((prevMessages) => [...prevMessages, msg]);
     });
-  }, []);
 
-  const sendMessage = (e) => {
-    e.preventDefault();
-    socket.emit("chatMessage", { user: user.username, message });
-    setMessage("");
+    return () => {
+      socket.off("message");
+    };
+  }, [navigate]);
+
+  const handleSendMessage = () => {
+    const token = localStorage.getItem("token");
+    sendMessage({ message }, token).then((response) => {
+      if (response.success) {
+        setMessage("");
+      } else {
+        setError(response.message);
+      }
+    });
   };
 
   return (
-    <div className="flex flex-col h-screen">
-      <div className="flex-1 overflow-auto p-4">
+    <div className="max-w-lg mx-auto bg-white p-6 rounded-lg shadow-md">
+      <h2 className="text-2xl font-bold mb-4">Chat Room</h2>
+      {error && <p className="text-red-500 mb-4">{error}</p>}
+      <div className="h-60 overflow-y-scroll mb-4">
         {messages.map((msg, index) => (
-          <div key={index} className="mb-2 p-2 bg-gray-100 rounded-md">
-            <p>
-              <strong>{msg.user}:</strong> {msg.message}
-            </p>
-          </div>
+          <ChatMessage key={index} user={msg.user} message={msg.message} />
         ))}
       </div>
-      <div className="p-4 bg-gray-200">
-        <form onSubmit={sendMessage} className="flex">
-          <input
-            type="text"
-            value={message}
-            onChange={(e) => setMessage(e.target.value)}
-            className="flex-1 border border-gray-300 rounded-md p-2"
-            placeholder="Type a message..."
-            required
-          />
-          <button
-            type="submit"
-            className="ml-2 bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600"
-          >
-            Send
-          </button>
-        </form>
+      <div className="flex">
+        <input
+          type="text"
+          value={message}
+          onChange={(e) => setMessage(e.target.value)}
+          className="form-input mt-1 block flex-grow"
+        />
+        <button
+          onClick={handleSendMessage}
+          className="bg-blue-500 text-white py-2 px-4 rounded-md ml-2 hover:bg-blue-600"
+        >
+          Send
+        </button>
       </div>
     </div>
   );
-};
+}

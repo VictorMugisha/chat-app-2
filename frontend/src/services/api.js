@@ -53,3 +53,12 @@ export const sendMessage = async (message, token) => {
   });
   return response.json();
 };
+
+// Function to upload profile picture
+export const uploadProfilePicture = async (userId, formData) => {
+  const response = await fetch(`${API_URL}/users/${userId}/profile-picture`, {
+    method: "POST",
+    body: formData,
+  });
+  return response.json();
+};

@@ -1,10 +1,11 @@
 const express = require("express");
+const cors = require("cors");
 const mongoose = require("mongoose");
 const userRoutes = require("./routes/userRoutes");
 const chatRoutes = require("./routes/chatRoutes");
 const groupRoutes = require("./routes/groupRoutes");
 const authRoutes = require("./routes/authRoutes");
-const authenticateToken = require("./middleware/authMiddleware");
+const { authenticateToken } = require("./middleware/authMiddleware");
 require("dotenv").config();
 
 const app = express();
@@ -13,6 +14,7 @@ const MONGO_URI =
 
 // Middleware
 app.use(express.json());
+app.use(cors());
 
 // Routes
 app.use("/api/auth", authRoutes);

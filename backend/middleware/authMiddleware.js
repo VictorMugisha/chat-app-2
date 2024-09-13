@@ -1,7 +1,7 @@
 const jwt = require("jsonwebtoken");
 require("dotenv").config();
 
-export const JWT_SECRET =
+const JWT_SECRET =
   "thismustbeasecretstringinwhichnooneknowsaboutitforthesecurityofyourapplication";
 
 const authenticateToken = (req, res, next) => {
@@ -17,4 +17,4 @@ const authenticateToken = (req, res, next) => {
   });
 };
 
-module.exports = authenticateToken;
+module.exports = { authenticateToken, JWT_SECRET };

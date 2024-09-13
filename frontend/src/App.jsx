@@ -5,7 +5,9 @@ import ChatRoom from "./pages/ChatRoom";
 import Profile from "./pages/Profile";
 import Navbar from "./components/Navbar";
 
-function App() {
+import "./App.css";
+
+export default function App() {
   return (
     <Router>
       <Navbar />
@@ -20,5 +22,3 @@ function App() {
     </Router>
   );
 }
-
-export default App;
