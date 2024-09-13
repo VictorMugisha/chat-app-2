@@ -1,7 +1,11 @@
-// server.js
 const express = require("express");
 const http = require("http");
 const { Server } = require("socket.io");
+const connectDB = require("./config/db");
+const authRoutes = require("./routes/authRoutes");
+const dotenv = require("dotenv");
+
+dotenv.config();
 
 const app = express();
 const httpServer = http.createServer(app);
@@ -10,6 +14,24 @@ const io = new Server(httpServer, {
   cors: {
     origin: "*",
   },
+});
+
+connectDB(); // Connect to MongoDB
+
+app.use(express.json()); // Middleware for parsing JSON
+app.use("/api/auth", authRoutes); // Authentication routes
+
+
+// Socket.IO setup
+io.use((socket, next) => {
+  const token = socket.handshake.auth.token;
+  if (!token) return next(new Error("Authentication error"));
+
+  jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
+    if (err) return next(new Error("Authentication error"));
+    socket.user = user;
+    next();
+  });
 });
 
 // Store users and rooms
@@ -23,15 +45,12 @@ io.on("connection", (socket) => {
   socket.on("joinRoom", ({ username, room }) => {
     users[socket.id] = { username, room };
     socket.join(room);
-    console.log(`${username} has joined room ${room}`);
     socket.emit("message", `Welcome to room ${room}, ${username}`);
     socket.to(room).emit("message", `${username} has joined the room`);
   });
 
   // Handle message sending in a room
   socket.on("chatMessage", (message) => {
-    console.log(`Received message: ${message} from client ${socket.id}`);
-
     const user = users[socket.id];
     if (user && user.room) {
       // Broadcast the message to the specific room
