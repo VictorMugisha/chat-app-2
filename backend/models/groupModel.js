@@ -2,19 +2,17 @@ const mongoose = require("mongoose");
 
 // Define the Group Schema
 const GroupSchema = new mongoose.Schema({
-  name: { type: String, required: true }, // Name of the group
-  description: { type: String }, // Optional description of the group
-  members: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }], // List of user IDs who are members
-  admins: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }], // List of user IDs who are admins
+  name: { type: String, required: true },
+  description: { type: String },
+  members: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
+  admins: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
   createdBy: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
     required: true,
-  }, // User who created the group
-  createdAt: { type: Date, default: Date.now }, // When the group was created
-  updatedAt: { type: Date, default: Date.now }, // When the group was last updated
-  isPrivate: { type: Boolean, default: false }, // Whether the group is private or public
-  profilePicture: { type: String }, // URL to group profile picture
+  },
+  createdAt: { type: Date, default: Date.now },
+  isPrivate: { type: Boolean, default: false }, // Indicates if the group is private
 });
 
 // Middleware to update the `updatedAt` field before saving
